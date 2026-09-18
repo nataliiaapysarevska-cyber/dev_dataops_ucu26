@@ -37,7 +37,7 @@ During the first `terraform apply`, VM creation failed because the Compute Engin
 
 ### 2. State migration
 
-Directory: `state_migration/`
+Directory: `migrate_state_backend/`
 
 Terraform is initially initialized without a remote backend, so the state is stored locally.
 
