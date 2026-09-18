@@ -1,0 +1,241 @@
+$ terraform plan
+
+Acquiring state lock. This may take a few moments...
+google_storage_bucket.gcs: Refreshing state... [id=dev-dataops-terraform-ex1]
+google_bigquery_dataset.dataset: Refreshing state... [id=projects/dev-dataops/datasets/dev_db]
+google_compute_instance.vm: Refreshing state... [id=projects/dev-dataops/zones/us-central1-c/instances/vm-v1]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+Releasing state lock. This may take a few moments...
+
+
+$ terraform destroy
+
+
+google_bigquery_dataset.dataset: Refreshing state... [id=projects/dev-dataops/datasets/dev_db]
+google_storage_bucket.gcs: Refreshing state... [id=dev-dataops-terraform-ex1]
+google_compute_instance.vm: Refreshing state... [id=projects/dev-dataops/zones/us-central1-c/instances/vm-v1]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # google_bigquery_dataset.dataset will be destroyed
+  - resource "google_bigquery_dataset" "dataset" {
+      - creation_time                   = 1789755440740 -> null
+      - dataset_id                      = "dev_db" -> null
+      - default_partition_expiration_ms = 0 -> null
+      - default_table_expiration_ms     = 0 -> null
+      - delete_contents_on_destroy      = false -> null
+      - deletion_policy                 = "DELETE" -> null
+      - description                     = "DEV dataset for testing terraform command" -> null
+      - effective_labels                = {
+          - "env"                        = "dev"
+          - "goog-terraform-provisioned" = "true"
+        } -> null
+      - etag                            = "dLVypkvHbMdPVyhJPANPOQ==" -> null
+      - friendly_name                   = "DEV dataset" -> null
+      - id                              = "projects/dev-dataops/datasets/dev_db" -> null
+      - is_case_insensitive             = false -> null
+      - labels                          = {
+          - "env" = "dev"
+        } -> null
+      - last_modified_time              = 1789755440740 -> null
+      - location                        = "us-central1" -> null
+      - max_time_travel_hours           = "168" -> null
+      - project                         = "dev-dataops" -> null
+      - resource_tags                   = {} -> null
+      - self_link                       = "https://bigquery.googleapis.com/bigquery/v2/projects/dev-dataops/datasets/dev_db" -> null
+      - terraform_labels                = {
+          - "env"                        = "dev"
+          - "goog-terraform-provisioned" = "true"
+        } -> null
+        # (2 unchanged attributes hidden)
+
+      - access {
+          - role           = "OWNER" -> null
+          - user_by_email  = "nataliiapysarevskaedu@gmail.com" -> null
+            # (4 unchanged attributes hidden)
+        }
+      - access {
+          - role           = "OWNER" -> null
+          - special_group  = "projectOwners" -> null
+            # (4 unchanged attributes hidden)
+        }
+      - access {
+          - role           = "READER" -> null
+          - special_group  = "projectReaders" -> null
+            # (4 unchanged attributes hidden)
+        }
+      - access {
+          - role           = "WRITER" -> null
+          - special_group  = "projectWriters" -> null
+            # (4 unchanged attributes hidden)
+        }
+    }
+
+  # google_compute_instance.vm will be destroyed
+  - resource "google_compute_instance" "vm" {
+      - can_ip_forward             = false -> null
+      - cpu_platform               = "Intel Broadwell" -> null
+      - creation_timestamp         = "2026-09-18T11:21:51.325-07:00" -> null
+      - current_status             = "RUNNING" -> null
+      - deletion_policy            = "DELETE" -> null
+      - deletion_protection        = false -> null
+      - effective_labels           = {
+          - "goog-terraform-provisioned" = "true"
+        } -> null
+      - enable_display             = false -> null
+      - id                         = "projects/dev-dataops/zones/us-central1-c/instances/vm-v1" -> null
+      - instance_id                = "3469291271229554641" -> null
+      - label_fingerprint          = "vezUS-42LLM=" -> null
+      - labels                     = {} -> null
+      - machine_type               = "e2-standard-2" -> null
+      - metadata                   = {} -> null
+      - metadata_fingerprint       = "zLJs55VQgJQ=" -> null
+      - name                       = "vm-v1" -> null
+      - project                    = "dev-dataops" -> null
+      - resource_policies          = [] -> null
+      - self_link                  = "https://www.googleapis.com/compute/v1/projects/dev-dataops/zones/us-central1-c/instances/vm-v1" -> null
+      - tags                       = [
+          - "dev",
+        ] -> null
+      - tags_fingerprint           = "xlip8CMnj60=" -> null
+      - terraform_labels           = {
+          - "goog-terraform-provisioned" = "true"
+        } -> null
+      - zone                       = "us-central1-c" -> null
+        # (4 unchanged attributes hidden)
+
+      - boot_disk {
+          - auto_delete                     = true -> null
+          - device_name                     = "persistent-disk-0" -> null
+          - force_attach                    = false -> null
+          - guest_os_features               = [
+              - "UEFI_COMPATIBLE",
+              - "VIRTIO_SCSI_MULTIQUEUE",
+              - "SEV_CAPABLE",
+              - "SEV_SNP_CAPABLE",
+              - "SEV_LIVE_MIGRATABLE",
+              - "SEV_LIVE_MIGRATABLE_V2",
+              - "GVNIC",
+              - "IDPF",
+              - "TDX_CAPABLE",
+            ] -> null
+          - mode                            = "READ_WRITE" -> null
+          - source                          = "https://www.googleapis.com/compute/v1/projects/dev-dataops/zones/us-central1-c/disks/vm-v1" -> null
+            # (6 unchanged attributes hidden)
+
+          - initialize_params {
+              - architecture                = "X86_64" -> null
+              - enable_confidential_compute = false -> null
+              - image                       = "https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/centos-stream-9-v20260908" -> null
+              - labels                      = {} -> null
+              - provisioned_iops            = 0 -> null
+              - provisioned_throughput      = 0 -> null
+              - replica_zones               = [] -> null
+              - resource_manager_tags       = {} -> null
+              - resource_policies           = [] -> null
+              - size                        = 20 -> null
+              - type                        = "pd-standard" -> null
+                # (2 unchanged attributes hidden)
+            }
+        }
+
+      - network_interface {
+          - internal_ipv6_prefix_length = 0 -> null
+          - name                        = "nic0" -> null
+          - network                     = "https://www.googleapis.com/compute/v1/projects/dev-dataops/global/networks/default" -> null
+          - network_ip                  = "10.128.0.2" -> null
+          - queue_count                 = 0 -> null
+          - stack_type                  = "IPV4_ONLY" -> null
+          - subnetwork                  = "https://www.googleapis.com/compute/v1/projects/dev-dataops/regions/us-central1/subnetworks/default" -> null
+          - subnetwork_project          = "dev-dataops" -> null
+          - vlan                        = 0 -> null
+            # (6 unchanged attributes hidden)
+
+          - access_config {
+              - nat_ip                 = "136.116.161.253" -> null
+              - network_tier           = "PREMIUM" -> null
+                # (1 unchanged attribute hidden)
+            }
+        }
+
+      - scheduling {
+          - automatic_restart           = true -> null
+          - availability_domain         = 0 -> null
+          - host_error_timeout_seconds  = 0 -> null
+          - min_node_cpus               = 0 -> null
+          - on_host_maintenance         = "MIGRATE" -> null
+          - preemptible                 = false -> null
+          - provisioning_model          = "STANDARD" -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - shielded_instance_config {
+          - enable_integrity_monitoring = true -> null
+          - enable_secure_boot          = false -> null
+          - enable_vtpm                 = true -> null
+        }
+    }
+
+  # google_storage_bucket.gcs will be destroyed
+  - resource "google_storage_bucket" "gcs" {
+      - default_event_based_hold    = false -> null
+      - deletion_policy             = "DELETE" -> null
+      - effective_labels            = {
+          - "goog-terraform-provisioned" = "true"
+        } -> null
+      - enable_object_retention     = false -> null
+      - force_destroy               = false -> null
+      - id                          = "dev-dataops-terraform-ex1" -> null
+      - labels                      = {} -> null
+      - location                    = "US" -> null
+      - name                        = "dev-dataops-terraform-ex1" -> null
+      - project                     = "dev-dataops" -> null
+      - project_number              = 513719378898 -> null
+      - public_access_prevention    = "inherited" -> null
+      - requester_pays              = false -> null
+      - rpo                         = "DEFAULT" -> null
+      - self_link                   = "https://www.googleapis.com/storage/v1/b/dev-dataops-terraform-ex1" -> null
+      - storage_class               = "STANDARD" -> null
+      - terraform_labels            = {
+          - "goog-terraform-provisioned" = "true"
+        } -> null
+      - time_created                = "2026-09-18T18:17:21.250Z" -> null
+      - uniform_bucket_level_access = true -> null
+      - updated                     = "2026-09-18T18:17:21.250Z" -> null
+      - url                         = "gs://dev-dataops-terraform-ex1" -> null
+
+      - hierarchical_namespace {
+          - enabled = false -> null
+        }
+
+      - soft_delete_policy {
+          - effective_time             = "2026-09-18T18:17:21.250Z" -> null
+          - retention_duration_seconds = 604800 -> null
+        }
+    }
+
+Plan: 0 to add, 0 to change, 3 to destroy.
+
+Do you really want to destroy all resources?
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  Enter a value: yes
+
+google_storage_bucket.gcs: Destroying... [id=dev-dataops-terraform-ex1]
+google_compute_instance.vm: Destroying... [id=projects/dev-dataops/zones/us-central1-c/instances/vm-v1]
+google_bigquery_dataset.dataset: Destroying... [id=projects/dev-dataops/datasets/dev_db]
+google_bigquery_dataset.dataset: Destruction complete after 1s
+google_storage_bucket.gcs: Destruction complete after 2s
+google_compute_instance.vm: Still destroying... [id=projects/dev-dataops/zones/us-central1-c/instances/vm-v1, 00m10s elapsed]
+google_compute_instance.vm: Still destroying... [id=projects/dev-dataops/zones/us-central1-c/instances/vm-v1, 00m20s elapsed]
+google_compute_instance.vm: Destruction complete after 24s
+Releasing state lock. This may take a few moments...
+
+Destroy complete! Resources: 3 destroyed.
