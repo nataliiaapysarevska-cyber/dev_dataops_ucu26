@@ -1,0 +1,12 @@
+models:
+  llama:
+    model: ai/llama3.2:3B-Q4_K_M
+
+services:
+  chatbot:
+    build: .
+    ports:
+      - "8050:8050"
+    models:
+      - llama
+

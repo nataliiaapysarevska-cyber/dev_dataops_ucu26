@@ -6,3 +6,4 @@ Homework assignments for the DEV_DataOps course.
 
 - [Homework 1 — Terraform](./hw1-terraform/)
 - [Homework 2 — Docker Mandatory](./docker-mandatory/)
+- [Homework 2 — Docker Advanced](./hw2-docker-advanced/)
