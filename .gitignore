@@ -13,4 +13,4 @@
 __pycache__/
 *.pyc
 terraform_hw/
-docker-mandatory/new-data/
+hw2-docker-mandatory/new-data/
