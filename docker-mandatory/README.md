@@ -17,4 +17,4 @@ The application is available at http://localhost:8501.
 
 ## DockerHub
 
-Docker image: [link will be added after push]
+Docker image: https://hub.docker.com/repository/docker/nataliiapysarevskaucu/recipe-finder/general
