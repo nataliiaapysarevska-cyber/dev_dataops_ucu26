@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordpress-app-configmap
+data:
+  database_name: wordpress
+  database_host: mariadb-service
