@@ -17,6 +17,12 @@ resource "google_storage_bucket_iam_member" "infra_state_access" {
   member = "serviceAccount:${google_service_account.infra.email}"
 }
 
+resource "google_project_iam_member" "infra_compute_viewer" {
+  project = var.project_id
+  role    = "roles/compute.viewer"
+  member  = "serviceAccount:${google_service_account.infra.email}"
+}
+
 resource "google_service_account_iam_member" "app_github_access" {
   service_account_id = google_service_account.app.name
   role               = "roles/iam.workloadIdentityUser"
