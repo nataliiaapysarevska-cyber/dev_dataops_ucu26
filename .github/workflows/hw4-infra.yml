@@ -2,6 +2,15 @@ name: HW4 Infrastructure CI/CD
 
 on:
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
   pull_request:
     branches:
       - main
@@ -43,7 +52,7 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
-  terraform-plan:
+  terraform-deploy:
     needs: terraform-validate
 
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
@@ -53,6 +62,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
+
+    concurrency:
+      group: hw4-infra
+      cancel-in-progress: false
 
     defaults:
       run:
@@ -81,5 +94,9 @@ jobs:
         run: terraform init -input=false
 
       - name: Terraform plan
-        run: terraform plan -input=false -out=tfplan
+        run: terraform plan -input=false -lock-timeout=5m -out=tfplan
+
+      - name: Terraform apply
+        if: inputs.action == 'apply'
+        run: terraform apply -input=false -lock-timeout=5m tfplan
 
