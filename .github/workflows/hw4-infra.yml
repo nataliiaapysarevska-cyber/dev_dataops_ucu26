@@ -12,6 +12,12 @@ on:
 permissions:
   contents: read
 
+env:
+  TF_VERSION: '1.16.3'
+  TF_IN_AUTOMATION: 'true'
+  TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
+  TF_VAR_gke_node_sa: ${{ vars.GCP_NODE_SA }}
+
 jobs:
   terraform-validate:
     runs-on: ubuntu-latest
@@ -25,6 +31,8 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform format check
         run: terraform fmt -check
@@ -35,7 +43,7 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
-  gcp_auth:
+  terraform-plan:
     needs: terraform-validate
 
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
@@ -43,7 +51,12 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      contents: read
       id-token: write
+
+    defaults:
+      run:
+        working-directory: hw4-ci-cd/terraform
 
     steps:
       - name: Checkout repository
@@ -59,10 +72,14 @@ jobs:
       - name: Setup Google Cloud CLI
         uses: google-github-actions/setup-gcloud@v3
 
-      - name: Verify authentication
-        run: |
-          gcloud auth list
-          gcloud config list
-          gcloud container clusters list \
-            --project=${{ vars.GCP_PROJECT_ID }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform plan
+        run: terraform plan -input=false -out=tfplan
 
