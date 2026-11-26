@@ -14,3 +14,7 @@ __pycache__/
 *.pyc
 terraform_hw/
 hw2-docker-mandatory/new-data/
+tfplan
+*.tfplan
+gha-creds-*.json
+hw3-k8s/local-ai-chatbot/
