@@ -5,6 +5,7 @@ resources:
 - deployment-v1.yaml
 - service.yaml
 - deployment-v2.yaml
+- deployment-v3.yaml
 
 images:
 - name: hello-gitops-v1
@@ -13,3 +14,6 @@ images:
 - name: hello-gitops-v2
   newName: nataliiapysarevskaucu/hello-gitops-ucu
   newTag: 0ad5919ed99f337e9615221c2aeb0c18f8c96920
+- name: hello-gitops-v3
+  newName: nataliiapysarevskaucu/hello-gitops-ucu
+  newTag: 24f729e264d6fd9e0ddd542784544edca9aca39d
