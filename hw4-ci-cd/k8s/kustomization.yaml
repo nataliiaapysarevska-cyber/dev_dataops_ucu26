@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment-v1.yaml
+  - service.yaml
+
+images:
+  - name: nataliiapysarevskaucu/hello-gitops-ucu
+    newTag: 2bf95e4c278fb78c3d37b00a4424666fd16f1e92
