@@ -99,8 +99,9 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
+      pull-requests: write
 
     concurrency:
       group: hw4-app-deploy
@@ -152,12 +153,32 @@ jobs:
           echo "Current active version: $ACTIVE_VERSION"
           echo "version=$ACTIVE_VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Determine next version
+        id: next-version
+        env:
+          ACTIVE_VERSION: ${{ steps.active-version.outputs.version }}
+        run: |
+          if [[ -z "$ACTIVE_VERSION" ]]; then
+            NEXT_MAJOR=1
+          elif [[ "$ACTIVE_VERSION" =~ ^v([0-9]+)\.0\.0$ ]]; then
+            CURRENT_MAJOR="${BASH_REMATCH[1]}"
+            NEXT_MAJOR=$((CURRENT_MAJOR + 1))
+          else
+            echo "Unexpected active version: $ACTIVE_VERSION"
+            exit 1
+          fi
+
+          echo "version=v${NEXT_MAJOR}.0.0" >> "$GITHUB_OUTPUT"
+          echo "deployment=my-app-v${NEXT_MAJOR}" >> "$GITHUB_OUTPUT"
+          echo "manifest=deployment-v${NEXT_MAJOR}.yaml" >> "$GITHUB_OUTPUT"
+          echo "image=hello-gitops-v${NEXT_MAJOR}" >> "$GITHUB_OUTPUT"
+
       - name: Initial deployment
         if: steps.active-version.outputs.version == ''
         working-directory: hw4-ci-cd/k8s
         run: |
           kustomize edit set image \
-            "$IMAGE_NAME=$IMAGE_NAME:$GITHUB_SHA"
+            "hello-gitops-v1=$IMAGE_NAME:$GITHUB_SHA"
 
           kustomize build .
 
@@ -169,3 +190,127 @@ jobs:
           kubectl get deployments
           kubectl get pods
           kubectl get services
+
+      - name: Generate next deployment
+        if: steps.active-version.outputs.version != ''
+        working-directory: hw4-ci-cd/k8s
+        env:
+          ACTIVE_VERSION: ${{ steps.active-version.outputs.version }}
+          NEXT_VERSION: ${{ steps.next-version.outputs.version }}
+          NEXT_DEPLOYMENT: ${{ steps.next-version.outputs.deployment }}
+          NEXT_MANIFEST: ${{ steps.next-version.outputs.manifest }}
+          NEXT_IMAGE: ${{ steps.next-version.outputs.image }}
+        run: |
+          CURRENT_MAJOR="${ACTIVE_VERSION%%.*}"
+          CURRENT_MANIFEST="deployment-${CURRENT_MAJOR}.yaml"
+
+          yq '
+            .metadata.name = strenv(NEXT_DEPLOYMENT) |
+            .spec.selector.matchLabels.version = strenv(NEXT_VERSION) |
+            .spec.template.metadata.labels.version = strenv(NEXT_VERSION) |
+            .spec.template.spec.containers[0].image = strenv(NEXT_IMAGE)
+          ' "$CURRENT_MANIFEST" > "$NEXT_MANIFEST"
+
+          cat "$NEXT_MANIFEST"
+
+      - name: Prepare Kustomize configuration
+        if: steps.active-version.outputs.version != ''
+        working-directory: hw4-ci-cd/k8s
+        env:
+          NEXT_MANIFEST: ${{ steps.next-version.outputs.manifest }}
+          NEXT_IMAGE: ${{ steps.next-version.outputs.image }}
+        run: |
+          kustomize edit add resource "$NEXT_MANIFEST"
+
+          kustomize edit set image \
+            "$NEXT_IMAGE=$IMAGE_NAME:$GITHUB_SHA"
+
+          kustomize build .
+
+      - name: Deploy candidate
+        if: steps.active-version.outputs.version != ''
+        working-directory: hw4-ci-cd/k8s
+        shell: bash
+        env:
+          NEXT_DEPLOYMENT: ${{ steps.next-version.outputs.deployment }}
+        run: |
+          kustomize build . |
+            yq -e 'select(
+              .kind == "Deployment" and
+              .metadata.name == strenv(NEXT_DEPLOYMENT)
+            )' |
+            kubectl apply -f -
+
+      - name: Wait for candidate readiness
+        if: steps.active-version.outputs.version != ''
+        env:
+          NEXT_DEPLOYMENT: ${{ steps.next-version.outputs.deployment }}
+        run: |
+          kubectl rollout status deployment/"$NEXT_DEPLOYMENT" \
+            --timeout=300s
+
+          kubectl get deployments
+          kubectl get pods -L version
+          
+      - name: Switch traffic
+        if: steps.active-version.outputs.version != ''
+        env:
+          NEXT_VERSION: ${{ steps.next-version.outputs.version }}
+        run: |
+          kubectl patch service my-app \
+            -p "{\"spec\":{\"selector\":{\"version\":\"$NEXT_VERSION\"}}}"
+
+          kubectl get service my-app \
+            -o jsonpath='{.spec.selector}'
+
+          echo
+
+      - name: Update Kubernetes manifests
+        if: steps.active-version.outputs.version != ''
+        working-directory: hw4-ci-cd/k8s
+        env:
+          NEXT_VERSION: ${{ steps.next-version.outputs.version }}
+        run: |
+          yq -i '.spec.selector.version = strenv(NEXT_VERSION)' service.yaml
+
+          kustomize build .
+
+      - name: Commit and push Kubernetes manifests
+        id: git-update
+        env:
+          NEXT_VERSION: ${{ steps.next-version.outputs.version }}
+        run: |
+          BRANCH_NAME="deploy/hw4-${NEXT_VERSION}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git switch -c "$BRANCH_NAME"
+
+          git add hw4-ci-cd/k8s/
+
+          if git diff --cached --quiet; then
+            echo "No Kubernetes manifest changes"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "Deploy application ${NEXT_VERSION}"
+
+          git push origin "$BRANCH_NAME"
+
+          echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create deployment pull request
+        if: steps.git-update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ steps.git-update.outputs.branch }}
+          NEXT_VERSION: ${{ steps.next-version.outputs.version }}
+        run: |
+          gh pr create \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --title "Deploy application ${NEXT_VERSION}" \
+            --body "Update Kubernetes manifests after successful deployment of ${NEXT_VERSION}. Docker image tag: ${GITHUB_SHA}."

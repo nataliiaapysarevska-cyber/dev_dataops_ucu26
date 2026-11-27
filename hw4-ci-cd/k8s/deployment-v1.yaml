@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: my-app
-          image: nataliiapysarevskaucu/hello-gitops-ucu
+          image: hello-gitops-v1
           ports:
             - name: http
               containerPort: 8050
