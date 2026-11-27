@@ -4,8 +4,12 @@ kind: Kustomization
 resources:
 - deployment-v1.yaml
 - service.yaml
+- deployment-v2.yaml
 
 images:
 - name: hello-gitops-v1
   newName: nataliiapysarevskaucu/hello-gitops-ucu
   newTag: 0c95715292dad53b7211eb46c9562e320e50cca6
+- name: hello-gitops-v2
+  newName: nataliiapysarevskaucu/hello-gitops-ucu
+  newTag: 0ad5919ed99f337e9615221c2aeb0c18f8c96920
